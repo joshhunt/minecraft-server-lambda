@@ -16,8 +16,8 @@
     "@types/node": "^20.9.0",
     "aws-lambda": "^1.0.7",
     "copyfiles": "2.4.1",
+    "discord-interactions": "^3.4.0",
     "esbuild": "^0.19.5",
-    "tweetnacl": "^1.0.3",
     "typescript": "^5.2.2"
   },
   "packageManager": "pnpm@8.10.2"

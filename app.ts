@@ -1,5 +1,12 @@
 import { Handler, APIGatewayEvent } from "aws-lambda";
-import nacl from "tweetnacl";
+import { verifyKey } from "discord-interactions";
+
+function respond401(message: string) {
+  return {
+    statusCode: 401,
+    body: JSON.stringify(message),
+  };
+}
 
 export const handler: Handler<APIGatewayEvent> = async (event, context) => {
   // Checking signature (requirement 1.)
@@ -10,24 +17,23 @@ export const handler: Handler<APIGatewayEvent> = async (event, context) => {
   }
 
   const signature = event.headers["x-signature-ed25519"];
+  if (!signature) return respond401("no signature");
+
   const timestamp = event.headers["x-signature-timestamp"];
-  const strBody = event.body; // should be string, for successful sign
+  if (!timestamp) return respond401("no timestamp");
 
-  const isVerified =
-    timestamp &&
-    signature &&
-    strBody &&
-    nacl.sign.detached.verify(
-      Buffer.from(timestamp + strBody),
-      Buffer.from(signature, "hex"),
-      Buffer.from(PUBLIC_KEY, "hex")
-    );
+  const strBody = event.body;
+  if (!strBody) return respond401("no body");
 
-  if (!isVerified) {
-    return {
-      statusCode: 401,
-      body: JSON.stringify("invalid request signature"),
-    };
+  const isValidRequest = verifyKey(
+    strBody,
+    signature,
+    timestamp,
+    "MY_CLIENT_PUBLIC_KEY"
+  );
+
+  if (!isValidRequest) {
+    return respond401("invalid request signature");
   }
 
   // Replying to ping (requirement 2.)
