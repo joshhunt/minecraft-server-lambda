@@ -1,4 +1,4 @@
-import { Handler, APIGatewayEvent } from "aws-lambda";
+import { Handler, APIGatewayEvent, APIGatewayProxyResult } from "aws-lambda";
 import { verifyKey } from "discord-interactions";
 import {
   InteractionType,
@@ -7,6 +7,7 @@ import {
 } from "discord-api-types/v10";
 import { interactionResponse } from "./lib/discord.js";
 import { StatusCodes } from "http-status-codes";
+import { dispatchCommand } from "./commands/dispatch.js";
 
 function responseMessage(message: string, statusCode: number = StatusCodes.OK) {
   return {
@@ -15,7 +16,10 @@ function responseMessage(message: string, statusCode: number = StatusCodes.OK) {
   };
 }
 
-export const handler: Handler<APIGatewayEvent> = async (event, context) => {
+export const handler: Handler<APIGatewayEvent, APIGatewayProxyResult> = async (
+  event,
+  context
+): Promise<APIGatewayProxyResult> => {
   const PUBLIC_KEY = process.env.PUBLIC_KEY;
   if (!PUBLIC_KEY) {
     throw new Error("PUBLIC_KEY is not defined");
@@ -52,11 +56,23 @@ export const handler: Handler<APIGatewayEvent> = async (event, context) => {
   }
 
   if (body.type == InteractionType.ApplicationCommand) {
-    return interactionResponse({
-      type: InteractionResponseType.ChannelMessageWithSource,
-      data: {
-        content: "Hello world!",
-      },
-    });
+    const result = dispatchCommand(body);
+
+    if (result) {
+      return {
+        statusCode: 200,
+        body: JSON.stringify(result),
+      };
+    } else {
+      return responseMessage(
+        "no handler for this command",
+        StatusCodes.NOT_FOUND
+      );
+    }
   }
+
+  return responseMessage(
+    "don't know how to handle this",
+    StatusCodes.BAD_REQUEST
+  );
 };
