@@ -20,6 +20,7 @@ export const handler: Handler<APIGatewayEvent, APIGatewayProxyResult> = async (
   event,
   context
 ): Promise<APIGatewayProxyResult> => {
+  console.log("recieved event");
   const PUBLIC_KEY = process.env.PUBLIC_KEY;
   if (!PUBLIC_KEY) {
     throw new Error("PUBLIC_KEY is not defined");
@@ -48,6 +49,7 @@ export const handler: Handler<APIGatewayEvent, APIGatewayProxyResult> = async (
   }
 
   const body = JSON.parse(strBody) as APIInteraction;
+  console.log("event body", body);
 
   if (body.type == InteractionType.Ping) {
     return interactionResponse({
