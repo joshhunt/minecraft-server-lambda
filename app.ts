@@ -56,13 +56,10 @@ export const handler: Handler<APIGatewayEvent, APIGatewayProxyResult> = async (
   }
 
   if (body.type == InteractionType.ApplicationCommand) {
-    const result = dispatchCommand(body);
+    const result = await dispatchCommand(body);
 
     if (result) {
-      return {
-        statusCode: 200,
-        body: JSON.stringify(result),
-      };
+      return interactionResponse(result);
     } else {
       return responseMessage(
         "no handler for this command",
