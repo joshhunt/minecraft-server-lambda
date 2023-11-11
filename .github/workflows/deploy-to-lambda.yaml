@@ -22,7 +22,7 @@ jobs:
       - name: Build
         run: pnpm build
       - name: Create zip
-        run: zip -r deployment.zip out
+        run: zip -r deployment.zip out/*
       - name: default deploy
         uses: appleboy/lambda-action@be5535841f177a96f28804e5e58c7c50eedc73a5
         with:
