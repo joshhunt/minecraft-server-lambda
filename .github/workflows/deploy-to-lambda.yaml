@@ -33,3 +33,7 @@ jobs:
           zip_file: deployment.zip
       - name: Register commands
         run: pnpm register-commands
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          APP_ID: ${{ secrets.APP_ID }}
+          GUILD_ID: ${{ secrets.GUILD_ID }}
