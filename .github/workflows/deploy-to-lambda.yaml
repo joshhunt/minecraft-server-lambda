@@ -22,10 +22,10 @@ jobs:
       - name: Build
         run: pnpm build
       - name: default deploy
-        uses: appleboy/lambda-action@v0.1.9
+        uses: appleboy/lambda-action@be5535841f177a96f28804e5e58c7c50eedc73a5
         with:
           aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws_region: ${{ secrets.AWS_REGION }}
-          function_name: ${{ secrets.AWS_REGION }}
+          function_name: ${{ secrets.AWS_FUNCTION_NAME }}
           source: out/main.js
