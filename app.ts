@@ -56,6 +56,7 @@ export const handler: Handler<APIGatewayEvent, APIGatewayProxyResult> = async (
   }
 
   if (body.type == InteractionType.ApplicationCommand) {
+    console.log("Received command", body);
     const result = await dispatchCommand(body);
 
     if (result) {
