@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "pnpm esbuild app.ts --bundle --outfile=out/index.js --platform=node --format=esm; copyfiles package.json out"
+    "build": "pnpm esbuild app.ts --bundle --external:crypto --outfile=out/index.js --platform=node --format=esm; copyfiles package.json out"
   },
   "keywords": [],
   "author": "",

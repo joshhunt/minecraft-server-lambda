@@ -35,6 +35,9 @@ export const handler: Handler<APIGatewayEvent> = async (event, context) => {
   if (body.type == 1) {
     return {
       statusCode: 200,
+      headers: {
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({ type: 1 }),
     };
   }
