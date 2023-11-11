@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "pnpm esbuild app.ts --outfile=out/main.js --platform=node --format=esm"
+    "build": "pnpm esbuild app.ts --outfile=out/index.js --platform=node --format=esm"
   },
   "keywords": [],
   "author": "",
