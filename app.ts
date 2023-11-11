@@ -37,12 +37,7 @@ export const handler: Handler<APIGatewayEvent, APIGatewayProxyResult> = async (
   const strBody = event.body;
   if (!strBody) return responseMessage("no body", StatusCodes.BAD_REQUEST);
 
-  const isValidRequest = verifyKey(
-    strBody,
-    signature,
-    timestamp,
-    "MY_CLIENT_PUBLIC_KEY"
-  );
+  const isValidRequest = verifyKey(strBody, signature, timestamp, PUBLIC_KEY);
 
   if (!isValidRequest) {
     return responseMessage("invalid signature", StatusCodes.UNAUTHORIZED);
