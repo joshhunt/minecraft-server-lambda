@@ -16,5 +16,6 @@
     "aws-lambda": "^1.0.7",
     "esbuild": "^0.19.5",
     "typescript": "^5.2.2"
-  }
+  },
+  "packageManager": "pnpm@8.10.2"
 }
