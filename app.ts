@@ -1,29 +1,36 @@
 import { Handler, APIGatewayEvent } from "aws-lambda";
 import { verifyKey } from "discord-interactions";
+import {
+  InteractionType,
+  type APIInteraction,
+  InteractionResponseType,
+} from "discord-api-types/v10";
+import { interactionResponse } from "./lib/discord.js";
+import { StatusCodes } from "http-status-codes";
 
-function respond401(message: string) {
+function responseMessage(message: string, statusCode: number = StatusCodes.OK) {
   return {
-    statusCode: 401,
-    body: JSON.stringify(message),
+    statusCode: statusCode,
+    body: JSON.stringify({ message }),
   };
 }
 
 export const handler: Handler<APIGatewayEvent> = async (event, context) => {
-  // Checking signature (requirement 1.)
-  // Your public key can be found on your application in the Developer Portal
   const PUBLIC_KEY = process.env.PUBLIC_KEY;
   if (!PUBLIC_KEY) {
     throw new Error("PUBLIC_KEY is not defined");
   }
 
   const signature = event.headers["x-signature-ed25519"];
-  if (!signature) return respond401("no signature");
+  if (!signature)
+    return responseMessage("no signature", StatusCodes.BAD_REQUEST);
 
   const timestamp = event.headers["x-signature-timestamp"];
-  if (!timestamp) return respond401("no timestamp");
+  if (!timestamp)
+    return responseMessage("no timestamp", StatusCodes.BAD_REQUEST);
 
   const strBody = event.body;
-  if (!strBody) return respond401("no body");
+  if (!strBody) return responseMessage("no body", StatusCodes.BAD_REQUEST);
 
   const isValidRequest = verifyKey(
     strBody,
@@ -33,18 +40,23 @@ export const handler: Handler<APIGatewayEvent> = async (event, context) => {
   );
 
   if (!isValidRequest) {
-    return respond401("invalid request signature");
+    return responseMessage("invalid signature", StatusCodes.UNAUTHORIZED);
   }
 
-  // Replying to ping (requirement 2.)
-  const body = JSON.parse(strBody);
-  if (body.type == 1) {
-    return {
-      statusCode: 200,
-      headers: {
-        "Content-Type": "application/json",
+  const body = JSON.parse(strBody) as APIInteraction;
+
+  if (body.type == InteractionType.Ping) {
+    return interactionResponse({
+      type: InteractionResponseType.Pong,
+    });
+  }
+
+  if (body.type == InteractionType.ApplicationCommand) {
+    return interactionResponse({
+      type: InteractionResponseType.ChannelMessageWithSource,
+      data: {
+        content: "Hello world!",
       },
-      body: JSON.stringify({ type: 1 }),
-    };
+    });
   }
 };
