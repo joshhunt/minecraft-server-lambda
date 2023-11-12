@@ -4,7 +4,7 @@ import {
   InteractionResponseType,
 } from "discord-api-types/v10";
 
-import * as AWS from "aws-sdk";
+import AWS from "aws-sdk";
 
 const ec2 = new AWS.EC2();
 
