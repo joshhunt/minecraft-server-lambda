@@ -16,4 +16,9 @@ export const commands: Record<string, Command> = {
     description: "greets you",
     handler: handleHelloCommand,
   },
+
+  ["start-server"]: {
+    description: "starts up the server",
+    handler: handleHelloCommand,
+  },
 };
