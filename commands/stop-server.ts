@@ -19,6 +19,7 @@ export default async function handleStopServerCommand(
   command: APIApplicationCommandInteraction
 ): Promise<APIInteractionResponse> {
   const instanceId = process.env.INSTANCE_ID;
+  console.log("stopping instance", instanceId);
 
   if (!instanceId) {
     return respond(
@@ -29,7 +30,9 @@ export default async function handleStopServerCommand(
   const params = {
     InstanceIds: [instanceId],
   };
+  console.log("stopping instance with params", params);
   var data = await ec2.stopInstances(params).promise();
+  console.log("neat, stopped instance!", data);
 
   return respond("Okay - I've stopped the server. Goodnight...");
 }
