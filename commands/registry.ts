@@ -3,6 +3,7 @@ import {
   APIInteractionResponse,
 } from "discord-api-types/v10";
 import handleHelloCommand from "./hello.js";
+import handleStartServerCommand from "./start-server.js";
 
 interface Command {
   description: string;
@@ -19,6 +20,6 @@ export const commands: Record<string, Command> = {
 
   ["start-server"]: {
     description: "starts up the server",
-    handler: handleHelloCommand,
+    handler: handleStartServerCommand,
   },
 };
