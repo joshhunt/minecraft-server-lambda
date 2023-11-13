@@ -5,15 +5,9 @@ import {
 } from "discord-api-types/v10";
 
 import AWS from "aws-sdk";
+import { respond } from "../lib/discord.js";
 
 const ec2 = new AWS.EC2();
-
-function respond(message: string): APIInteractionResponse {
-  return {
-    type: InteractionResponseType.ChannelMessageWithSource,
-    data: { content: message },
-  };
-}
 
 export default async function handleStopServerCommand(
   command: APIApplicationCommandInteraction

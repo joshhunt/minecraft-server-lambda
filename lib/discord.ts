@@ -1,4 +1,7 @@
-import { APIInteractionResponse } from "discord-api-types/v10";
+import {
+  APIInteractionResponse,
+  InteractionResponseType,
+} from "discord-api-types/v10";
 
 export function interactionResponse(resp: APIInteractionResponse): any {
   return {
@@ -7,5 +10,12 @@ export function interactionResponse(resp: APIInteractionResponse): any {
       "Content-Type": "application/json",
     },
     body: JSON.stringify(resp),
+  };
+}
+
+export function respond(message: string): APIInteractionResponse {
+  return {
+    type: InteractionResponseType.ChannelMessageWithSource,
+    data: { content: message },
   };
 }

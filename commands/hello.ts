@@ -4,11 +4,36 @@ import {
   InteractionResponseType,
 } from "discord-api-types/v10";
 
-export default function handleHelloCommand(
+import AWS from "aws-sdk";
+import { respond } from "../lib/discord.js";
+
+const lambda = new AWS.Lambda();
+
+export default async function handleHelloCommand(
   command: APIApplicationCommandInteraction
-): APIInteractionResponse {
+): Promise<APIInteractionResponse> {
+  const lambdaARN = process.env.SELF_LAMBDA_ARN;
+
+  command.token;
+
+  if (!lambdaARN) {
+    return respond(
+      "Unable to start the server because process.env.SELF_LAMBDA_ARN isn't set!"
+    );
+  }
+
+  await lambda
+    .invokeAsync({
+      FunctionName: lambdaARN,
+      InvokeArgs: JSON.stringify({
+        command: "say Hello, world!",
+        discordToken: command.token,
+      }),
+    })
+    .promise();
+
   return {
     type: InteractionResponseType.ChannelMessageWithSource,
-    data: { content: "Hello, world!" },
+    data: { content: `Hello, world! Invoked ${lambdaARN}` },
   };
 }
