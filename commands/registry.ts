@@ -7,7 +7,10 @@ import {
   startServerInitialHandler,
   startServerAsyncHandler,
 } from "./start-server.js";
-import handleStopServerCommand from "./stop-server.js";
+import {
+  stopServerInitialHandler,
+  stopServerAsyncHandler,
+} from "./stop-server.js";
 
 interface Command {
   description: string;
@@ -31,6 +34,7 @@ export const commands: Record<string, Command> = {
 
   ["stop-server"]: {
     description: "stops the server",
-    initialHandler: handleStopServerCommand,
+    initialHandler: stopServerInitialHandler,
+    asyncHandler: stopServerAsyncHandler,
   },
 };

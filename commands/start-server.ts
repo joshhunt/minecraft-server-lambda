@@ -52,5 +52,7 @@ export async function startServerAsyncHandler(
   var data = await ec2.startInstances(params).promise();
   console.log("responded, sending reply back to discord");
 
+  // TODO: Wait for instance to start and send more detaild responses
+
   await setFollowup("Server started!", command.application_id, command.token);
 }

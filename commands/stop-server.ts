@@ -5,28 +5,58 @@ import {
 } from "discord-api-types/v10";
 
 import AWS from "aws-sdk";
-import { respond } from "../lib/discord.js";
+import { respond, setFollowup } from "../lib/discord.js";
+import { createDiscordInteractionFollowupEvent } from "../lib/lambda.js";
 
+const lambda = new AWS.Lambda();
 const ec2 = new AWS.EC2();
 
-export default async function handleStopServerCommand(
+export async function stopServerInitialHandler(
   command: APIApplicationCommandInteraction
-): Promise<APIInteractionResponse> {
+) {
+  const lambdaARN = process.env.SELF_LAMBDA_ARN;
+  if (!lambdaARN) {
+    return respond("process.env.SELF_LAMBDA_ARN not set :(");
+  }
+
+  console.log("invoking lambda....");
+  await lambda
+    .invokeAsync({
+      FunctionName: lambdaARN,
+      InvokeArgs: JSON.stringify(
+        createDiscordInteractionFollowupEvent(command)
+      ),
+    })
+    .promise();
+
+  console.log("returning with response");
+  return respond(
+    "Acknowledged! I'll stop the server and let you know when it's done :)"
+  );
+}
+
+export async function stopServerAsyncHandler(
+  command: APIApplicationCommandInteraction
+): Promise<void> {
+  console.log("stopServerAsyncHandler");
   const instanceId = process.env.INSTANCE_ID;
-  console.log("stopping instance", instanceId);
 
   if (!instanceId) {
-    return respond(
-      "Unable to stop the server because process.env.INSTANCE_ID isn't set!"
-    );
+    throw new Error("INSTANCE_ID is not defined");
   }
 
   const params = {
     InstanceIds: [instanceId],
   };
-  console.log("stopping instance with params", params);
+  console.log("booting instance", params);
   var data = await ec2.stopInstances(params).promise();
-  console.log("neat, stopped instance!", data);
+  console.log("responded, sending reply back to discord");
 
-  return respond("Okay - I've stopped the server. Goodnight...");
+  // TODO: Wait for instance to stop and send more detaild responses
+
+  await setFollowup(
+    "Server stopped! good night",
+    command.application_id,
+    command.token
+  );
 }
