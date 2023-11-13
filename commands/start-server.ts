@@ -19,6 +19,7 @@ export async function startServerInitialHandler(
     return respond("process.env.SELF_LAMBDA_ARN not set :(");
   }
 
+  console.log("invoking lambda....");
   await lambda
     .invokeAsync({
       FunctionName: lambdaARN,
@@ -28,6 +29,7 @@ export async function startServerInitialHandler(
     })
     .promise();
 
+  console.log("returning with response");
   return respond(
     "Acknowledged! I'll start the server and let you know when it's ready :)"
   );

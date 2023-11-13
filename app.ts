@@ -14,6 +14,8 @@ export const handler: Handler<Event> = async (event, context) => {
     return await handleDiscordInteractionFollowup(event);
   } else {
     console.log("routing event to handleAPIGatewayEvent");
-    return await handleAPIGatewayEvent(event);
+    const resp = await handleAPIGatewayEvent(event);
+    console.log("returning response", resp);
+    return resp;
   }
 };
