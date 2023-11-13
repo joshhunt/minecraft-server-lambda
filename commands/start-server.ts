@@ -20,14 +20,16 @@ export async function startServerInitialHandler(
   }
 
   console.log("invoking lambda....");
-  await lambda
+  lambda
     .invokeAsync({
       FunctionName: lambdaARN,
       InvokeArgs: JSON.stringify(
         createDiscordInteractionFollowupEvent(command)
       ),
     })
-    .promise();
+    .promise()
+    .then((v) => console.log("successfully invoked lamda", v))
+    .catch((err) => console.log("error invoking lamda", err));
 
   console.log("returning with response");
   return respond(
