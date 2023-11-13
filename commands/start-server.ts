@@ -5,27 +5,50 @@ import {
 } from "discord-api-types/v10";
 
 import AWS from "aws-sdk";
-import { respond } from "../lib/discord.js";
+import { respond, setFollowup } from "../lib/discord.js";
+import { createDiscordInteractionFollowupEvent } from "../lib/lambda.js";
 
+const lambda = new AWS.Lambda();
 const ec2 = new AWS.EC2();
 
-export default async function handleStartServerCommand(
+export async function startServerInitialHandler(
   command: APIApplicationCommandInteraction
-): Promise<APIInteractionResponse> {
+) {
+  const lambdaARN = process.env.SELF_LAMBDA_ARN;
+  if (!lambdaARN) {
+    return respond("process.env.SELF_LAMBDA_ARN not set :(");
+  }
+
+  await lambda
+    .invokeAsync({
+      FunctionName: lambdaARN,
+      InvokeArgs: JSON.stringify(
+        createDiscordInteractionFollowupEvent(command)
+      ),
+    })
+    .promise();
+
+  return respond(
+    "Acknowledged! I'll start the server and let you know when it's ready :)"
+  );
+}
+
+export async function startServerAsyncHandler(
+  command: APIApplicationCommandInteraction
+): Promise<void> {
+  console.log("startServerAsyncHandler");
   const instanceId = process.env.INSTANCE_ID;
 
   if (!instanceId) {
-    return respond(
-      "Unable to start the server because process.env.INSTANCE_ID isn't set!"
-    );
+    throw new Error("INSTANCE_ID is not defined");
   }
 
   const params = {
     InstanceIds: [instanceId],
   };
+  console.log("booting instance", params);
   var data = await ec2.startInstances(params).promise();
+  console.log("responded, sending reply back to discord");
 
-  return respond(
-    "Okay - I've started the server. It should be ready in a bit :)"
-  );
+  await setFollowup("Server started!", command.application_id, command.token);
 }

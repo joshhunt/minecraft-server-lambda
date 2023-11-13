@@ -13,9 +13,6 @@ export default async function handleHelloCommand(
   command: APIApplicationCommandInteraction
 ): Promise<APIInteractionResponse> {
   const lambdaARN = process.env.SELF_LAMBDA_ARN;
-
-  command.token;
-
   if (!lambdaARN) {
     return respond(
       "Unable to start the server because process.env.SELF_LAMBDA_ARN isn't set!"

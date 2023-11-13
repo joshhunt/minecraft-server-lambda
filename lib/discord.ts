@@ -19,3 +19,25 @@ export function respond(message: string): APIInteractionResponse {
     data: { content: message },
   };
 }
+
+export async function setFollowup(
+  message: string,
+  discordAppID: string,
+  interactionToken: string
+): Promise<APIInteractionResponse> {
+  const body = {
+    content: message,
+  };
+
+  const url = `https://discord.com/api/v10/webhooks/${discordAppID}/${interactionToken}`;
+
+  const resp = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+
+  return await resp.json();
+}

@@ -8,6 +8,16 @@ export async function dispatchCommand(
   const commandObj = commands[command.data.name];
 
   if (commandObj) {
-    return await commandObj.handler(command);
+    return await commandObj.initialHandler(command);
+  }
+}
+
+export async function dispatchAsyncCommand(
+  command: APIApplicationCommandInteraction
+) {
+  const commandObj = commands[command.data.name];
+
+  if (commandObj) {
+    return await commandObj.asyncHandler?.(command);
   }
 }

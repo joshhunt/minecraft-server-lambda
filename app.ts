@@ -1,73 +1,19 @@
 import { Handler, APIGatewayEvent, APIGatewayProxyResult } from "aws-lambda";
-import { verifyKey } from "discord-interactions";
-import {
-  InteractionType,
-  type APIInteraction,
-  InteractionResponseType,
-} from "discord-api-types/v10";
-import { interactionResponse } from "./lib/discord.js";
-import { StatusCodes } from "http-status-codes";
-import { dispatchCommand } from "./commands/dispatch.js";
+import { handleAPIGatewayEvent } from "./handlers/apiGateway.js";
+import { DiscordInteractionFollowupEvent } from "./lib/types.js";
+import { handleDiscordInteractionFollowup } from "./handlers/discordInteractionFollowup.js";
 
-function responseMessage(message: string, statusCode: number = StatusCodes.OK) {
-  return {
-    statusCode: statusCode,
-    body: JSON.stringify({ message }),
-  };
-}
+type Event = DiscordInteractionFollowupEvent | APIGatewayEvent;
 
-export const handler: Handler<APIGatewayEvent, APIGatewayProxyResult> = async (
-  event,
-  context
-): Promise<APIGatewayProxyResult> => {
+export const handler: Handler<Event> = async (event, context) => {
   console.log("Lambda recieved event", event);
   console.log("with context", context);
 
-  const PUBLIC_KEY = process.env.PUBLIC_KEY;
-  if (!PUBLIC_KEY) {
-    throw new Error("PUBLIC_KEY is not defined");
+  if ("type" in event) {
+    console.log("routing event to handleDiscordInteractionFollowup");
+    return await handleDiscordInteractionFollowup(event);
+  } else {
+    console.log("routing event to handleAPIGatewayEvent");
+    return await handleAPIGatewayEvent(event);
   }
-
-  const signature = event.headers["x-signature-ed25519"];
-  if (!signature)
-    return responseMessage("no signature", StatusCodes.BAD_REQUEST);
-
-  const timestamp = event.headers["x-signature-timestamp"];
-  if (!timestamp)
-    return responseMessage("no timestamp", StatusCodes.BAD_REQUEST);
-
-  const strBody = event.body;
-  if (!strBody) return responseMessage("no body", StatusCodes.BAD_REQUEST);
-
-  const isValidRequest = verifyKey(strBody, signature, timestamp, PUBLIC_KEY);
-
-  if (!isValidRequest) {
-    return responseMessage("invalid signature", StatusCodes.UNAUTHORIZED);
-  }
-
-  const body = JSON.parse(strBody) as APIInteraction;
-
-  if (body.type == InteractionType.Ping) {
-    return interactionResponse({
-      type: InteractionResponseType.Pong,
-    });
-  }
-
-  if (body.type == InteractionType.ApplicationCommand) {
-    const result = await dispatchCommand(body);
-
-    if (result) {
-      return interactionResponse(result);
-    } else {
-      return responseMessage(
-        "no handler for this command",
-        StatusCodes.NOT_FOUND
-      );
-    }
-  }
-
-  return responseMessage(
-    "don't know how to handle this",
-    StatusCodes.BAD_REQUEST
-  );
 };
