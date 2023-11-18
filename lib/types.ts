@@ -1,7 +1,6 @@
-import { APIGatewayEvent } from "aws-lambda";
+import { APIApplicationCommandInteraction } from "discord-api-types/v10";
 
-export interface DiscordInteractionParallelEvent {
-  type: "parallel-executor";
-  // interaction: APIApplicationCommandInteraction;
-  eventPayload: APIGatewayEvent;
+export interface DiscordInteractionFollowupEvent {
+  type: "discord-interaction-followup";
+  interaction: APIApplicationCommandInteraction;
 }
