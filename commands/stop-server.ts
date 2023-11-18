@@ -1,13 +1,18 @@
 import {
   APIApplicationCommandInteraction,
   APIInteractionResponse,
+  APIMessage,
   InteractionResponseType,
 } from "discord-api-types/v10";
 
 import EC2 from "aws-sdk/clients/ec2";
 import Lambda from "aws-sdk/clients/lambda";
 import { respond, setFollowup } from "../lib/discord.js";
-import { createDiscordInteractionFollowupEvent } from "../lib/lambda.js";
+import {
+  createDiscordInteractionFollowupEvent,
+  getErrorMessage,
+  pollForState,
+} from "../lib/lambda.js";
 
 const lambda = new Lambda();
 const ec2 = new EC2();
@@ -49,15 +54,42 @@ export async function stopServerAsyncHandler(
   const params = {
     InstanceIds: [instanceId],
   };
-  console.log("booting instance", params);
-  var data = await ec2.stopInstances(params).promise();
-  console.log("responded, sending reply back to discord");
 
-  // TODO: Wait for instance to stop and send more detaild responses
+  let reply: APIMessage = await setFollowup(
+    "Stopping server...",
+    command.application_id,
+    command.token
+  );
+  console.log("discord reply body", reply);
+
+  try {
+    console.log("stopping instance", params);
+    await ec2.stopInstances(params).promise();
+
+    await pollForState(instanceId, "stopped", async (state) => {
+      reply = await setFollowup(
+        `Instance is ${state}...`,
+        command.application_id,
+        command.token,
+        reply.id
+      );
+    });
+  } catch (err) {
+    console.error("Error starting instance", err);
+    const message = getErrorMessage(err);
+    await setFollowup(
+      "Oopsies, something went wrong:\n" + message,
+      command.application_id,
+      command.token,
+      reply.id
+    );
+    return;
+  }
 
   await setFollowup(
     "Server stopped! good night",
     command.application_id,
-    command.token
+    command.token,
+    reply.id
   );
 }

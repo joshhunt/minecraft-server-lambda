@@ -11,6 +11,7 @@ import { respond, setFollowup } from "../lib/discord.js";
 import {
   createDiscordInteractionFollowupEvent,
   getErrorMessage,
+  pollForState,
 } from "../lib/lambda.js";
 
 const lambda = new Lambda();
@@ -65,29 +66,14 @@ export async function startServerAsyncHandler(
     console.log("booting instance", params);
     await ec2.startInstances(params).promise();
 
-    let lastStatus = "";
-
-    while (true) {
-      const thisStatus = await getInstanceStatus(instanceId);
-
-      if (thisStatus != lastStatus) {
-        console.log("Status changed", thisStatus);
-        lastStatus = thisStatus;
-
-        reply = await setFollowup(
-          `Instance is ${thisStatus}`,
-          command.application_id,
-          command.token,
-          reply.id
-        );
-      }
-
-      await wait(1000);
-
-      if (thisStatus == "running") {
-        break;
-      }
-    }
+    await pollForState(instanceId, "running", async (state) => {
+      reply = await setFollowup(
+        `Instance is ${state}...`,
+        command.application_id,
+        command.token,
+        reply.id
+      );
+    });
   } catch (err) {
     console.error("Error starting instance", err);
     const message = getErrorMessage(err);
@@ -106,27 +92,4 @@ export async function startServerAsyncHandler(
     command.token,
     reply.id
   );
-}
-
-async function getInstanceStatus(instanceId: string): Promise<string> {
-  const params: DescribeInstanceStatusRequest = {
-    InstanceIds: [instanceId],
-    IncludeAllInstances: true,
-  };
-
-  var data = await ec2.describeInstanceStatus(params).promise();
-
-  const instanceInfo = data.InstanceStatuses?.find(
-    (status) => status.InstanceId == instanceId
-  );
-  if (!instanceInfo) {
-    console.warn("Instance not found", instanceId);
-    return "Unknown instance";
-  }
-
-  return instanceInfo.InstanceState?.Name ?? "Unknown status";
-}
-
-function wait(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
 }
