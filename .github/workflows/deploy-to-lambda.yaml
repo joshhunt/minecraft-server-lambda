@@ -37,3 +37,9 @@ jobs:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           APP_ID: ${{ secrets.APP_ID }}
           GUILD_ID: ${{ secrets.GUILD_ID }}
+      - name: Discord notification
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        uses: Ilshidur/action-discord@0.3.2
+        with:
+          args: "The project {{ EVENT_PAYLOAD.repository.full_name }} has been deployed."
