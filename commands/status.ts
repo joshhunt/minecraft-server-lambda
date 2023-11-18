@@ -24,6 +24,7 @@ export async function serverStatusInitialHandler(
     InstanceIds: [instanceId],
     IncludeAllInstances: true,
   };
+
   console.log("getting status", params);
   var data = await ec2.describeInstanceStatus(params).promise();
   console.log(data);

@@ -1,9 +1,10 @@
 import { APIGatewayEvent, APIGatewayProxyResult } from "aws-lambda";
-import { responseMessage } from "../lib/lambda.js";
+import { getErrorMessage, responseMessage } from "../lib/lambda.js";
 import { StatusCodes } from "http-status-codes";
 import { interactionResponse } from "../lib/discord.js";
 import {
   APIInteraction,
+  APIInteractionResponse,
   InteractionResponseType,
   InteractionType,
 } from "discord-api-types/v10";
@@ -44,7 +45,14 @@ export async function handleAPIGatewayEvent(
   }
 
   if (body.type == InteractionType.ApplicationCommand) {
-    const result = await dispatchCommand(body);
+    let result: APIInteractionResponse | undefined;
+
+    try {
+      result = await dispatchCommand(body);
+    } catch (err) {
+      const message = getErrorMessage(err);
+      return responseMessage("Oopsies, something went wrong:\n" + message);
+    }
 
     if (result) {
       return interactionResponse(result);

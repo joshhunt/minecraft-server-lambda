@@ -1,5 +1,6 @@
 import {
   APIInteractionResponse,
+  APIMessage,
   InteractionResponseType,
 } from "discord-api-types/v10";
 
@@ -23,16 +24,21 @@ export function respond(message: string): APIInteractionResponse {
 export async function setFollowup(
   message: string,
   discordAppID: string,
-  interactionToken: string
-): Promise<APIInteractionResponse> {
+  interactionToken: string,
+  messageIDToEdit?: string
+): Promise<APIMessage> {
+  console.log("Sending followup message", message);
+
   const body = {
     content: message,
   };
 
-  const url = `https://discord.com/api/v10/webhooks/${discordAppID}/${interactionToken}`;
+  const url = messageIDToEdit
+    ? `https://discord.com/api/v10/webhooks/${discordAppID}/${interactionToken}/messages/${messageIDToEdit}`
+    : `https://discord.com/api/v10/webhooks/${discordAppID}/${interactionToken}`;
 
   const resp = await fetch(url, {
-    method: "POST",
+    method: messageIDToEdit ? "PATCH" : "POST",
     headers: {
       "Content-Type": "application/json",
     },

@@ -20,3 +20,19 @@ export function createDiscordInteractionFollowupEvent(
     interaction,
   };
 }
+
+export function getErrorMessage(err: unknown) {
+  if (!err || typeof err !== "object") {
+    return "Unknown error";
+  }
+
+  if ("message" in err) {
+    return err.message;
+  }
+
+  if ("toString" in err) {
+    return err.toString();
+  }
+
+  return "Unknown error";
+}
