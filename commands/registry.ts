@@ -2,7 +2,7 @@ import {
   APIApplicationCommandInteraction,
   APIInteractionResponse,
 } from "discord-api-types/v10";
-import handleHelloCommand from "./hello.js";
+import { helloInitialHandler, helloAsyncHandler } from "./hello.js";
 import {
   startServerInitialHandler,
   startServerAsyncHandler,
@@ -23,7 +23,8 @@ interface Command {
 export const commands: Record<string, Command> = {
   hello: {
     description: "greets you",
-    initialHandler: handleHelloCommand,
+    initialHandler: helloInitialHandler,
+    asyncHandler: helloAsyncHandler,
   },
 
   ["start-server"]: {

@@ -1,10 +1,21 @@
+import { APIInteraction, InteractionType } from "discord-api-types/v10";
 import { dispatchAsyncCommand } from "../commands/dispatch.js";
-import { DiscordInteractionFollowupEvent } from "../lib/types.js";
+import { DiscordInteractionParallelEvent } from "../lib/types.js";
 
 export async function handleDiscordInteractionFollowup(
-  event: DiscordInteractionFollowupEvent
+  event: DiscordInteractionParallelEvent
 ) {
-  const command = event.interaction;
+  const strBody = event.eventPayload.body;
+  if (!strBody) {
+    throw new Error("no body");
+  }
+  const command = JSON.parse(strBody) as APIInteraction;
+
+  if (command.type !== InteractionType.ApplicationCommand) {
+    console.log("ignoring non-application command");
+    return;
+  }
+
   console.log("handleDiscordInteractionFollowup with command", command);
 
   await dispatchAsyncCommand(command);
