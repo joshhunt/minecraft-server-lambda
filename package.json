@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "pnpm esbuild app.ts --bundle --external:crypto --outfile=out/index.js --platform=node",
+    "build": "pnpm esbuild app.ts --bundle --external:crypto --minify --outfile=out/index.js --platform=node --target=node18",
     "register-commands": "tsx registerCommands.ts"
   },
   "keywords": [],

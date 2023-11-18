@@ -4,12 +4,13 @@ import {
   InteractionResponseType,
 } from "discord-api-types/v10";
 
-import AWS from "aws-sdk";
+import EC2 from "aws-sdk/clients/ec2";
+import Lambda from "aws-sdk/clients/lambda";
 import { respond, setFollowup } from "../lib/discord.js";
 import { createDiscordInteractionFollowupEvent } from "../lib/lambda.js";
 
-const lambda = new AWS.Lambda();
-const ec2 = new AWS.EC2();
+const lambda = new Lambda();
+const ec2 = new EC2();
 
 export async function stopServerInitialHandler(
   command: APIApplicationCommandInteraction
