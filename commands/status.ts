@@ -20,8 +20,9 @@ export async function serverStatusInitialHandler(
     throw new Error("INSTANCE_ID is not defined");
   }
 
-  const params = {
+  const params: EC2.DescribeInstanceStatusRequest = {
     InstanceIds: [instanceId],
+    IncludeAllInstances: true,
   };
   console.log("getting status", params);
   var data = await ec2.describeInstanceStatus(params).promise();
