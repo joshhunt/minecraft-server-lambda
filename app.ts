@@ -12,10 +12,12 @@ export const handler: Handler<Event> = async (event, context) => {
   if ("type" in event) {
     console.log("routing event to handleDiscordInteractionFollowup");
     return await handleDiscordInteractionFollowup(event);
-  } else {
+  } else if ("headers" in event) {
     console.log("routing event to handleAPIGatewayEvent");
     const resp = await handleAPIGatewayEvent(event);
     console.log("returning response", resp);
     return resp;
   }
+
+  throw new Error("Unable to handle event");
 };
