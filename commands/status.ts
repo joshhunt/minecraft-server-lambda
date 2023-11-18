@@ -27,11 +27,12 @@ export async function serverStatusInitialHandler(
   var data = await ec2.describeInstanceStatus(params).promise();
   console.log(data);
 
-  const statuses =
-    data.InstanceStatuses?.map(
-      (status) => `${status.InstanceId} is ${status.InstanceState?.Name}`
-    ).join("\n") ?? "No statuses found";
+  const statuses = data.InstanceStatuses?.map(
+    (status) => `${status.InstanceId} is ${status.InstanceState?.Name}`
+  );
+
+  const statusMessage = statuses?.length ? statuses?.join("\n") : undefined;
 
   console.log("returning with response");
-  return respond(statuses);
+  return respond(statusMessage ?? "Eek - no statuses found :(");
 }
